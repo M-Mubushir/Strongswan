@@ -1,0 +1,172 @@
+---
+- name: StrongSwan update to 6.0.0
+  hosts: localhost
+  become: true
+
+  tasks:
+    - name: Backup ipsec and strongswan config files
+      copy:
+        src: "{{ item }}"
+        dest: "/home/"
+        remote_src: yes
+      loop:
+        - /etc/ipsec.conf
+        - /etc/ipsec.secrets
+        - /etc/ipsec.d/
+        - /etc/strongswan.conf
+
+    - name: Stop monit service
+      systemd:
+        name: monit
+        state: stopped
+
+    - name: Stop strongswan-starter service
+      systemd:
+        name: strongswan-starter
+        state: stopped
+        enabled: no
+
+    - name: Remove StrongSwan and related packages
+      apt:
+        name:
+          - strongswan
+          - strongswan-pki
+          - libcharon-extauth-plugins
+          - libstrongswan-extra-plugins
+          - strongswan-swanctl
+          - libcharon-extra-plugins
+          - libstrongswan
+        state: absent
+        purge: true
+        autoremove: true
+
+    - name: Purge remaining strongswan-related packages
+      apt:
+        name:
+          - libstrongswan
+          - libstrongswan-extra-plugins
+          - libstrongswan-standard-plugins
+          - strongswan-charon
+          - strongswan-libcharon
+          - strongswan-pki
+          - strongswan-starter
+          - strongswan-swanctl
+        state: absent
+        purge: true
+        autoremove: true
+
+    - name: Find ipsec binary path
+      command: which ipsec
+      register: ipsec_path
+      ignore_errors: yes
+
+    - name: Remove ipsec binary if found
+      file:
+        path: "{{ ipsec_path.stdout }}"
+        state: absent
+      when: ipsec_path.stdout != ""
+
+    - name: Install required packages
+      apt:
+        name:
+          - build-essential
+          - libgmp-dev
+          - libssl-dev
+          - libpam0g-dev
+          - libcap-ng-dev
+          - libsystemd-dev
+          - libcurl4-openssl-dev
+          - libidn2-dev
+          - libldap2-dev
+          - libsqlite3-dev
+          - libxml2-dev
+          - libjson-c-dev
+          - python3-dev
+          - libpcsclite-dev
+          - pkg-config
+          - libwolfssl-dev
+          - libtss2-dev
+          - libtss2-tcti-tabrmd-dev
+          - wget
+          - curl
+        state: present
+        update_cache: yes
+
+#    - name: Install Strongswan-6.0.0 debian package
+
+
+    - name: Fetch new ipsec version
+      command: ipsec version
+      register: ipsec_version_output
+
+    - name: Print ipsec version
+      debug:
+        msg: "{{ ipsec_version_output.stdout }}"
+
+    - name: Remove existing config files
+      file:
+        path: "/etc/{{ item }}"
+        state: absent
+      loop:
+        - ipsec.conf
+        - ipsec.secrets
+        - strongswan.conf
+        - ipsec.d
+
+    - name: Restore old configuration files from backup
+      copy:
+        src: "/home/{{ item }}"
+        dest: "/etc/{{ item }}"
+        remote_src: yes
+      loop:
+        - ipsec.conf
+        - ipsec.secrets
+        - strongswan.conf
+        - ipsec.d
+
+    - name: Remove backup files after restoring
+      file:
+        path: "/home/{{ item }}"
+        state: absent
+      loop:
+        - ipsec.conf
+        - ipsec.secrets
+        - strongswan.conf
+        - ipsec.d
+
+
+#    - name: Update IKE Cipher in ipsec.conf
+
+
+    - name: Copy ipsec and swanctl binaries for Graffana and Ike-Middleware fix
+      copy:
+        src: "/usr/sbin/{{ item }}"
+        dest: "/usr/local/sbin/{{ item }}"
+        remote_src: yes
+      loop:
+        - ipsec
+        - swanctl
+
+    - name: Start and enable strongswan-starter service
+      systemd:
+        name: strongswan-starter
+        state: started
+        enabled: yes
+
+    - name: Start monit service
+      systemd:
+        name: monit
+        state: started
+
+    - name: Restart ike-middleware service
+      systemd:
+        name: ike-middleware
+        state: restarted
+
+    - name: Get status of strongswan-starter service
+      command: systemctl status strongswan-starter
+      register: strongswan_status
+
+    - name: Print strongswan-starter status
+      debug:
+        msg: "{{ strongswan_status.stdout }}"
