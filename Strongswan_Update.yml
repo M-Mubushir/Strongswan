@@ -151,8 +151,17 @@
         - strongswan.conf
         - ipsec.d
 
+    - name: Comment out existing ikev algorithms lines
+      replace:
+        path: /etc/ipsec.conf
+        regexp: '^(?!#)(\s*ike=.*)'
+        replace: '#\1'
 
-#    - name: Update IKE Cipher in ipsec.conf
+    - name: Insert new ikev algorithm line
+      lineinfile:
+        path: /etc/ipsec.conf
+        insertafter: '^#\s*ike='
+        line: "          ike=aes256-sha256-ecp384-ke1_mlkem512-ke1_mlkem768-ke1_mlkem1024,aes256-sha256-ecp384-mlkem512-mlkem768-mlkem1024,aes256-sha1-modp1024,aes256-sha256-ecp384,aes128-sha256-ecp256,aes256-s>
 
 
     - name: Copy ipsec and swanctl binaries for Graffana and Ike-Middleware fix
