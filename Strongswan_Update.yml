@@ -92,7 +92,34 @@
         state: present
         update_cache: yes
 
-#    - name: Install Strongswan-6.0.0 debian package
+    - name: Download StrongSwan source code
+      get_url:
+        url: https://download.strongswan.org/strongswan-6.0.0.tar.gz
+        dest: /tmp/strongswan-6.0.0.tar.gz
+
+    - name: Extract StrongSwan source
+      ansible.builtin.unarchive:
+        src: /tmp/strongswan-6.0.0.tar.gz
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Configure StrongSwan build
+      command:
+        cmd: ./configure --prefix=/usr --sysconfdir=/etc/ --enable-openssl --disable-mysql --disable-ldap --disable-static --enable-shared --enable-md4 --enable-eap-mschapv2 --enable-eap-aka --enable-eap-aka-3gpp2 --enable-eap-gtc --enable-eap-identity --enable-eap-md5 --enable-eap-peap --enable-eap-radius --enable-eap-sim --enable-eap-sim-file --enable-eap-simaka-pseudonym --enable-eap-simaka-reauth --enable-eap-simaka-sql --enable-eap-tls --enable-eap-tnc --enable-eap-ttls --enable-xauth-eap --enable-stroke --enable-wolfssl --enable-ml --enable-monolithic --enable-tpm --enable-sha3
+      args:
+        chdir: /tmp/strongswan-6.0.0
+
+    - name: Compile StrongSwan
+      command:
+        cmd: make
+      args:
+        chdir: /tmp/strongswan-6.0.0
+
+    - name: Install StrongSwan
+      command:
+        cmd: make install
+      args:
+        chdir: /tmp/strongswan-6.0.0
 
 
     - name: Fetch new ipsec version
