@@ -12,7 +12,7 @@
       loop:
         - /etc/ipsec.conf
         - /etc/ipsec.secrets
-        - /etc/ipsec.d/
+        - /etc/ipsec.d
         - /etc/strongswan.conf
 
     - name: Stop monit service
