@@ -36,19 +36,9 @@
           - strongswan-swanctl
           - libcharon-extra-plugins
           - libstrongswan
-        state: absent
-        purge: true
-        autoremove: true
-
-    - name: Purge remaining strongswan-related packages
-      apt:
-        name:
-          - libstrongswan
-          - libstrongswan-extra-plugins
           - libstrongswan-standard-plugins
           - strongswan-charon
           - strongswan-libcharon
-          - strongswan-pki
           - strongswan-starter
           - strongswan-swanctl
         state: absent
