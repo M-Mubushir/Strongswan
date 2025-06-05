@@ -161,7 +161,7 @@
       lineinfile:
         path: /etc/ipsec.conf
         insertafter: '^#\s*ike='
-        line: "          ike=aes256-sha256-ecp384-ke1_mlkem512-ke1_mlkem768-ke1_mlkem1024,aes256-sha256-ecp384-mlkem512-mlkem768-mlkem1024,aes256-sha1-modp1024,aes256-sha256-ecp384,aes128-sha256-ecp256,aes256-s>
+        line: "       ike=aes256-sha256-ecp384-ke1_mlkem512-ke1_mlkem768-ke1_mlkem1024,aes256-sha256-ecp384-mlkem512-mlkem768-mlkem1024,aes256-sha1-modp1024,aes256-sha256-ecp384,aes128-sha256-ecp256,aes256-sha384-ecp384,3des-sha1-modp1024,aes128-sha256-modp2048,aes128-sha1-modp2048,aes256-sha384-modp4096,aes256-sha256-modp4096,aes256-sha1-modp4096,aes128-sha256-modp1536,aes128-sha1-modp1536,aes256-sha384-modp2048,aes256-sha256-modp2048,aes256-sha1-modp2048,aes128-sha256-modp1024,aes128-sha1-modp1024,aes256-sha384-modp1536,aes256-sha256-modp1536,aes256-sha1-modp1536,aes256-sha384-modp1024,aes256-sha256-modp1024,aes256-sha256-ecp384!"
 
 
     - name: Copy ipsec and swanctl binaries for Graffana and Ike-Middleware fix
